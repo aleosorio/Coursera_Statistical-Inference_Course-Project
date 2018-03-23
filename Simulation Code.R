@@ -1,5 +1,4 @@
 library(tidyverse)
-
 set.seed(1)
 nosim <- 1000
 n <- 40
