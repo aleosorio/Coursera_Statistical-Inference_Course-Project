@@ -3,16 +3,15 @@ title: 'Statistical Inference Course Project - Part 1: Simulations'
 author: "Alejandro Osorio"
 date: "March 28, 2018"
 output:
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
 ---
 
+## General Parameters
 ```{r, echo=FALSE}
 # Parameters
 library(tidyverse)
 ```
-
-## Setting up general parameters
 
 ```{r}
 set.seed(1)
