@@ -3,8 +3,8 @@ title: 'Statistical Inference Course Project - Part 1: Simulations'
 author: "Alejandro Osorio"
 date: "March 28, 2018"
 output:
-  pdf_document: default
   html_notebook: default
+  pdf_document: default
 ---
 
 ```{r, echo=FALSE}
