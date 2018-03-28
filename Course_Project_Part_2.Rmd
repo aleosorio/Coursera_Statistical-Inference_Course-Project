@@ -1,0 +1,154 @@
+---
+title: 'Statistical Inference Course Project - Part 2: Simulations'
+author: "Alejandro Osorio"
+date: "March 28, 2018"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+We're going to analyze the ToothGrowth data in the R datasets package.
+
+### General Parameters
+```{r, echo=FALSE}
+# Parameters
+library(tidyverse)
+```
+
+```{r}
+data("ToothGrowth")
+```
+
+### Basic exploratory data analysis
+
+Starting with a quick view at the table structure:
+```{r}
+head(ToothGrowth)
+```
+
+So it consists of 3 variables: Length, Supplement and Dose.
+
+Now a quick glance at the table's size:
+```{r}
+dim(ToothGrowth)
+```
+
+So it's a small sample, therefore it'll require Student's test.
+
+Just in case, let's check it there are any NAs in there:
+```{r}
+table(is.na(ToothGrowth))
+```
+
+So there are no NAs.  Now a quick glance at the variable's attributes:
+```{r}
+str(ToothGrowth)
+```
+
+
+It shows length as a numeric variable, the supplements as 2 types, stored as a factor ("OJ" and "VC"), and the dose as a repeating number.  Let's check how supplements are related to which dosages then:
+```{r}
+with(ToothGrowth,table(dose, supp))
+```
+
+As we can see, the sample consists of 3 dosages, for which there are 10 records of each supplement.
+
+Additionally, a summary of the data to check any further information of interest:
+```{r}
+summary(ToothGrowth)
+```
+
+It shows a clear difference between the minimum and maximum tooth length, suggesting there's a good reason for some hypotheses to check.
+
+Finally, a visual analysis of the data, using boxplots by supplement and dose, to check for evident patterns with which to work later.
+```{r}
+ggplot(ToothGrowth, aes(x = supp, y = len)) +
+        geom_boxplot(aes(fill = supp), alpha = 0.5) +
+        facet_wrap(~ dose, nrow = 1)
+```
+
+It suggests a clear relation between both supplement and dosage, with length.
+
+The questions that arise from the exploratory analysis are, then:
+
+1.- Can it be infered that, with higher dosages, longer teeth will be attained?
+
+2.- If point 1 results to be true, Which supplement is more effective (obtains longer teeth)?
+
+### Hypotheses testing
+
+Both questions are tackled through hypothesis testing, based on the following assumptions:
+
+a) Variables are iid
+b) Samples are not paired from one dosage to the next (different subjects were monitored for each trial, with no relation whatsoever between them).
+c) Underlying distributions for each sample, along dosages and supplements, have different variances.
+
+#### Question 1: Higher dosages imply longer teeth?
+
+The null hypothesis, for this case, is:  Teeth growth is not affected by dosage.
+
+The alternative hypothesis is that, the higher the dosage, the longer teeth growth obtained.
+
+In order to cover the whole spectrum of dosages (0.5, 1 and 2), two hypothesis testings are carried on:  a) one for the dosage interval of 0.5 - 1. b) the second one for the interval of 1 - 2, as follows:
+
+##### Hypothesis testing for range 0.5 - 1
+
+Selected samples are those associated to both dosages of 0.5 and dosages of 1, as follows:
+```{r}
+dose05 <- filter(ToothGrowth, ToothGrowth$dose == 0.5) %>%
+        .$len
+dose1 <- filter(ToothGrowth, ToothGrowth$dose == 1) %>%
+        .$len
+```
+
+The one sided Student's test, then, based on the previous assumptions (included by default in the t.test) plus the filtered samples, goes as follows:
+```{r}
+t.test(dose1, dose05)
+```
+
+Which shows a greater teeth growth for dose1 (mean = 19.73) over dose05 (mean = 10.61), with a low enough p-value for the alternative hypothesis to replace the null one.
+
+##### Hypothesis testing for range 1 - 2
+
+Based on the same previous logic, the extra required sample, for dosage of 2 is obtained as follows:
+```{r}
+dose2 <- filter(ToothGrowth, ToothGrowth$dose == 2) %>%
+        .$len
+```
+
+The one sided Student's test, then, goes as follows:
+```{r}
+t.test(dose2, dose1)
+```
+
+Which shows a greater teeth growth for dose2 (mean = 26.10) over dose1 (mean = 19.74), with a low enough p-value for the alternative hypothesis to, again, replace the null one.
+
+#### Question 2: Which supplement is more effective (obtains longer teeth)?
+
+The null hypothesis, for this case, is:  Teeth growth is the same for both supplements.
+
+The alternative hypothesis is that, OJ supplement is more effective than VC.
+
+In this case, just one hypothesis testing is carried on, with the samples being those associated to OJ and VC supplements respectively, as follows:
+
+```{r}
+suppoj <- filter(ToothGrowth, ToothGrowth$supp == "OJ") %>%
+        .$len
+suppvc <- filter(ToothGrowth, ToothGrowth$supp == "VC") %>%
+        .$len
+```
+
+The one sided Student's test, then, based on the previous assumptions (included by default in the t.test) plus the filtered samples, goes as follows:
+```{r}
+t.test(suppoj, suppvc)
+```
+
+Which shows higher effectiveness of supplement OJ (mean = 20.66), over supplement VC (mean = 16.96) with a low enough p-value for the alternative hypothesis to replace the null one.
+
+### Final Conclusions
+
+Based on the previous preliminary data analysis, plus hypotheses testing, it can be concluded that:
+
+1.- The higher the dosage, the longer the teeth growth obtained.
+
+2.- Supplement OJ is more effective than supplement VC.
